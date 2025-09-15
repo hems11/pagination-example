@@ -16,8 +16,8 @@ const Pagination = () => {
         fetch("https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json")
         .then((res) => res.json())
         .then((data) => {setTableData(data)})
-        .catch((err) => console.error("Error fetching TableData:failed to fetch data", err))
-        console.log("data",setTableData);
+        .catch((err) => {console.error("Error fetching TableData:failed to fetch data", err)
+        alert("failed to fetch data")})
     },[])
 
     return (
@@ -32,18 +32,23 @@ const Pagination = () => {
                     <th>Role</th>
                     </tr>
                 </thead>
-                <tbody>
-                {currentRows.map((tdata) => (
-                    <tr key={tdata.id}>    
-                    <td>{tdata.id}</td>
-                    <td>{tdata.name}</td>
-                    <td>{tdata.email}</td>
-                    <td>{tdata.role}</td>
+            <tbody>
+                {tableData.length > 0 ? (
+                currentRows.map((tdata) => (
+                    <tr key={tdata.id}>
+                        <td>{tdata.id}</td>
+                        <td>{tdata.name}</td>
+                        <td>{tdata.email}</td>
+                        <td>{tdata.role}</td>
                     </tr>
-                ))}
-                </tbody>
+                ))
+                ) : (
+                    <tr>
+                        <td colSpan="4">Loading...</td>
+                    </tr>
+                )}
+            </tbody>
             </table>
-            
             <div className={styles.pagination}>
                 <button 
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} 
