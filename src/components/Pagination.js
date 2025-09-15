@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import styles from "./Pagination.module.css"
+import styles from "./Pagination.module.css";
 
 const Pagination = () => {
   const [tableData, setTableData] = useState([]);
@@ -7,17 +7,22 @@ const Pagination = () => {
   const rowsPerPage = 10;
 
   useEffect(() => {
-    fetch("https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json")
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Network response was not ok");
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json"
+        );
+        if (!response.ok) {
+          throw new Error("Network error");
         }
-        return res.json();
-      })
-      .then((data) => setTableData(data))
-      .catch(() => {
+        const data = await response.json();
+        setTableData(data);
+      } catch (error) {
         alert("failed to fetch data");
-      });
+      }
+    };
+
+    fetchData();
   }, []);
 
   // pagination logic
@@ -26,22 +31,9 @@ const Pagination = () => {
   const currentRows = tableData.slice(indexOfFirstRow, indexOfLastRow);
   const totalPages = Math.ceil(tableData.length / rowsPerPage);
 
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage((prev) => prev + 1);
-    }
-  };
-
-  const goToPrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    }
-  };
-
   return (
     <div>
-      <h1>Employee Data Table</h1>
-
+      <h1>Pagination Example</h1>
       <table>
         <thead>
           <tr>
@@ -52,31 +44,37 @@ const Pagination = () => {
           </tr>
         </thead>
         <tbody>
-          {currentRows.map((row) => (
-            <tr key={row.id}>
-              <td>{row.id}</td>
-              <td>{row.name}</td>
-              <td>{row.email}</td>
-              <td>{row.role}</td>
-            </tr>
-          ))}
-          {currentRows.length === 0 && (
+          {currentRows.length > 0 ? (
+            currentRows.map((row) => (
+              <tr key={row.id}>
+                <td>{row.id}</td>
+                <td>{row.name}</td>
+                <td>{row.email}</td>
+                <td>{row.role}</td>
+              </tr>
+            ))
+          ) : (
             <tr>
-              <td colSpan="4">No data available</td>
+              <td colSpan="4">Loading...</td>
             </tr>
           )}
         </tbody>
       </table>
 
-      <div className={styles.pagination}>
-        <button onClick={goToPrevPage} disabled={currentPage === 1}>
-          Previous
-        </button>
-        <span>{currentPage}</span>
-        <button onClick={goToNextPage} disabled={currentPage === totalPages}>
-          Next
-        </button>
-      </div>
+      {tableData.length > 0 && (
+        <div className={styles.pagenumber}>
+          <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1}>
+            Previous
+          </button>
+          <span className={styles.pagenumber}>{currentPage}</span>
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
